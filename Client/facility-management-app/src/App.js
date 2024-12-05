@@ -7,6 +7,21 @@ const App = () => {
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <h2>Welcome to My React App</h2>
         <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
+        <p>This is the content of the home page.</p>
       </div>
     </Layout>
   );
