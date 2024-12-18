@@ -6,7 +6,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    clean: true, // Cleans the output directory before rebuilding
+    clean: true,
+    publicPath: '/', // Cleans the output directory before rebuilding
   },
   module: {
     rules: [
@@ -30,5 +31,6 @@ module.exports = {
     static: './dist',
     port: 3000,
     open: true,
+    historyApiFallback: true,
   },
 };

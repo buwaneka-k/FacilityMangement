@@ -14,7 +14,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import { grey } from '@mui/material/colors';
+import { Link } from 'react-router-dom';
 
 const Menu = () => {
   return (
@@ -34,9 +36,25 @@ const Menu = () => {
       }}
     >
       <List sx={{ paddingTop: '20px' }}>
-        <Box sx={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>
+      <Link to="/" style={{ textDecoration: 'none' }}>
+      <Box sx={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>
           <h3>Menu</h3>
         </Box>
+      </Link>
+        
+        <Divider sx={{
+          flexShrink:'0',
+          borderTop:'0px solid rgba(0, 0, 0, 0.08)',
+          borderRight:'0px solid rgba(0, 0, 0, 0.08)', 
+          borderLeft:'0px solid rgba(0, 0, 0, 0.08)',
+          height:'0.0625rem',
+          margin:'1rem 0px',
+          borderBottom:'none',
+          opacity:'0.25',
+          backgroundColor: 'transparent', 
+          backgroundImage:'linear-gradient(to right, rgba(255, 255, 255, 0), rgb(255, 255, 255), rgba(255, 255, 255, 0)) !important'
+          }}></Divider>
+        <Link to="/facilities" style={{ textDecoration: 'none' }}>
         <MenuItem
           sx={{
             margin: '10px',
@@ -55,6 +73,7 @@ const Menu = () => {
           </ListItemIcon>
           <ListItemText primary="Facility" />
         </MenuItem>
+        </Link>
         <MenuItem
           sx={{
             margin: '10px',
@@ -87,7 +106,7 @@ const Menu = () => {
           }}
         >
           <ListItemIcon sx={{ color: 'white' }}>
-            <AccountCircleIcon />
+            <BedroomParentIcon />
           </ListItemIcon>
           <ListItemText primary="Asset" />
         </MenuItem>

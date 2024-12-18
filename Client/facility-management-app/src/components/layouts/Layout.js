@@ -4,6 +4,8 @@ import { Box, Container } from '@mui/material';
 import Menu from '../common/Menu';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import Facilities from '../../pages/Facilities';
+import { Outlet } from 'react-router-dom';
 
 const Layout = ({ children }) => {
   return (
@@ -39,7 +41,7 @@ const Layout = ({ children }) => {
               borderRadius: '0.75rem',
             }}
           >
-            {children}
+            <Outlet />
           </Box>
           <Footer />
         </Box>
