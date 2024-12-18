@@ -36,62 +36,64 @@ const Menu = () => {
       }}
     >
       <List sx={{ paddingTop: '20px' }}>
-      <Link to="/" style={{ textDecoration: 'none' }}>
-      <Box sx={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>
-          <h3>Menu</h3>
-        </Box>
-      </Link>
-        
-        <Divider sx={{
-          flexShrink:'0',
-          borderTop:'0px solid rgba(0, 0, 0, 0.08)',
-          borderRight:'0px solid rgba(0, 0, 0, 0.08)', 
-          borderLeft:'0px solid rgba(0, 0, 0, 0.08)',
-          height:'0.0625rem',
-          margin:'1rem 0px',
-          borderBottom:'none',
-          opacity:'0.25',
-          backgroundColor: 'transparent', 
-          backgroundImage:'linear-gradient(to right, rgba(255, 255, 255, 0), rgb(255, 255, 255), rgba(255, 255, 255, 0)) !important'
-          }}></Divider>
-        <Link to="/facilities" style={{ textDecoration: 'none' }}>
-        <MenuItem
-          sx={{
-            margin: '10px',
-            color: 'white',
-            fontSize: '16px',
-            height: '50px',
-            '&:hover': {
-              backgroundColor: grey[700], // Change background color on hover
-              color: 'white',
-              borderRadius: '10px 10px 10px 10px', // Change text color on hover
-            },
-          }}
-        >
-          <ListItemIcon sx={{ color: 'white' }}>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Facility" />
-        </MenuItem>
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <Box sx={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>
+            <h3>Menu</h3>
+          </Box>
         </Link>
-        <MenuItem
-          sx={{
-            margin: '10px',
-            color: 'white',
-            fontSize: '16px',
-            height: '50px',
-            '&:hover': {
-              backgroundColor: grey[700], // Change background color on hover
+
+        <Divider sx={{
+          flexShrink: '0',
+          borderTop: '0px solid rgba(0, 0, 0, 0.08)',
+          borderRight: '0px solid rgba(0, 0, 0, 0.08)',
+          borderLeft: '0px solid rgba(0, 0, 0, 0.08)',
+          height: '0.0625rem',
+          margin: '1rem 0px',
+          borderBottom: 'none',
+          opacity: '0.25',
+          backgroundColor: 'transparent',
+          backgroundImage: 'linear-gradient(to right, rgba(255, 255, 255, 0), rgb(255, 255, 255), rgba(255, 255, 255, 0)) !important'
+        }}></Divider>
+        <Link to="/facilities" style={{ textDecoration: 'none' }}>
+          <MenuItem
+            sx={{
+              margin: '10px',
               color: 'white',
-              borderRadius: '10px 10px 10px 10px', // Change text color on hover
-            },
-          }}
-        >
-          <ListItemIcon sx={{ color: 'white' }}>
-            <TableChartIcon />
-          </ListItemIcon>
-          <ListItemText primary="Space" />
-        </MenuItem>
+              fontSize: '16px',
+              height: '50px',
+              '&:hover': {
+                backgroundColor: grey[700], // Change background color on hover
+                color: 'white',
+                borderRadius: '10px 10px 10px 10px', // Change text color on hover
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white' }}>
+              <DashboardIcon />
+            </ListItemIcon>
+            <ListItemText primary="Facility" />
+          </MenuItem>
+        </Link>
+        <Link to="/spaces" style={{ textDecoration: 'none' }}>
+          <MenuItem
+            sx={{
+              margin: '10px',
+              color: 'white',
+              fontSize: '16px',
+              height: '50px',
+              '&:hover': {
+                backgroundColor: grey[700], // Change background color on hover
+                color: 'white',
+                borderRadius: '10px 10px 10px 10px', // Change text color on hover
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white' }}>
+              <TableChartIcon />
+            </ListItemIcon>
+            <ListItemText primary="Space" />
+          </MenuItem>
+        </Link>
         <MenuItem
           sx={{
             margin: '10px',
