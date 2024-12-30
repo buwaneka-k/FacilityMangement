@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import BasicTable from '../components/common/BasicTable';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Paper } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getData } from '../services/getService';
 
 const Spaces = () => {
-  const [headers] = useState(['Space Name', 'Facility Name', 'Type', 'Area']);
-  const [rows, setRows] = useState([
-    { 'Space Name': 'Rest Area', 'Facility Name': 'Gym', Type: 'Fitness', Area: '200 ft' },
-    { 'Space Name': 'Librarian Office', 'Facility Name': 'Library', Type: 'Study', Area: '100 ft' },
-  ]);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -17,6 +15,51 @@ const Spaces = () => {
     Type: '',
     Area: '',
   });
+
+  const columns = [
+    {
+      field: 'spaceID',
+      headerName: 'Space ID',
+      width: 90
+    },
+    {
+      field: 'spaceName',
+      headerName: 'Space Name',
+      width: 150
+    },
+    {
+      field: 'typeName',
+      headerName: 'Type',
+      width: 150,
+      valueGetter: (params) => params?.row?.type?.typeName || 'N/A'
+    },
+    {
+      field: 'capacity',
+      headerName: 'Capacity',
+      width: 150
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 110
+    }
+  ];
+
+  useEffect(() => {
+    // Calling the service method when the component mounts
+    const listData = async () => {
+      try {
+        const result = await getData("Spaces");
+        setRows(result);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
+
+    listData();
+  }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
@@ -116,11 +159,18 @@ const Spaces = () => {
             </Button>
           </Box>
 
-          <BasicTable
-            headers={headers}
+          <DataGrid
             rows={rows}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
+                },
+              },
+            }}
+            getRowId={(row) => row.spaceID}
+            pageSizeOptions={[5]}
           />
         </>
       )}
