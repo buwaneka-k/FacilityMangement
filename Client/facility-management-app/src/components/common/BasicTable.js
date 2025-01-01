@@ -23,30 +23,36 @@ const BasicTable = ({ headers, rows, onEdit, onDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {Object.values(row).map((cell, cellIndex) => (
-                <TableCell key={cellIndex}>{cell}</TableCell>
-              ))}
-              <TableCell>
-                <Button sx={{ border: 'none' }}
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => onEdit(rowIndex)}
-                >
-                  <ModeEditIcon sx={{ color: 'black' }}/>
-                </Button>
-                <Button sx={{ border: 'none' }}
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => onDelete(rowIndex)}
-                >
-                  <DeleteIcon sx={{ color: 'black' }}/>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+  {rows.map((row, rowIndex) => (
+    <TableRow key={rowIndex}>
+      {/* Exclude 'facilityID' from being displayed */}
+      {Object.entries(row)
+        .filter(([key]) => key !== "facilityID") // Exclude 'facilityID'
+        .map(([_, cellValue], cellIndex) => (
+          <TableCell key={cellIndex}>{cellValue}</TableCell>
+        ))}
+      {/* Action Buttons */}
+      <TableCell>
+        <Button
+          sx={{ border: 'none' }}
+          variant="outlined"
+          color="primary"
+          onClick={() => onEdit(rowIndex)}
+        >
+          <ModeEditIcon sx={{ color: 'black' }} />
+        </Button>
+        <Button
+          sx={{ border: 'none' }}
+          variant="outlined"
+          color="primary"
+          onClick={() => onDelete(rowIndex)}
+        >
+          <DeleteIcon sx={{ color: 'black' }} />
+        </Button>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
       </Table>
     </TableContainer>
   );

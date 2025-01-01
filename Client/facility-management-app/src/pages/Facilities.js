@@ -1,27 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect  } from 'react';
 import BasicTable from '../components/common/BasicTable';
 import { TextField, Button, Box, Paper } from '@mui/material';
+import { getData } from '../services/getService';
+import { postData } from '../services/postService';
+import { putData } from '../services/putService';
 
 const Facilities = () => {
     const [headers] = useState(['Facility Name', 'Location', 'Type', 'Status']);
-    const [rows, setRows] = useState([
-      { 'Facility Name': 'Gym', Location: 'New York', Type: 'Fitness', Status: 'Open' },
-      { 'Facility Name': 'Library', Location: 'London', Type: 'Study', Status: 'Closed' },
-    ]);
+    const [rows, setRows] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
     const [formData, setFormData] = useState({
-      'Facility Name': '',
+      'FacilityName': '',
       Location: '',
       Type: '',
       Status: '',
     });
   
+    useEffect(() => {
+      const fetchFacilities = async () => {
+        try {
+          const data = await getData('Facilities');
+          const transformedData = data.map((facility) => ({
+            'FacilityName': facility.facilityName,
+            Location: facility.location,
+            Type: facility.type?.typeName || 'Unknown', // Handling nested type object
+            Status: facility.status,
+            facilityID:facility.facilityID
+        }));
+          setRows(transformedData);
+        } catch (error) {
+          console.error('Error loading facilities:', error);
+        }
+      };
+  
+      fetchFacilities();
+    }, []);
+
     const handleAddClick = () => {
       setIsAdding(true);
       setIsEditing(false);
-      setFormData({ 'Facility Name': '', Location: '', Type: '', Status: '' });
+      setFormData({ 'FacilityName': '', Location: '', Type: '', Status: '' });
     };
   
     const handleEditClick = (index) => {
@@ -34,7 +54,7 @@ const Facilities = () => {
     const handleCancelClick = () => {
       setIsAdding(false);
       setIsEditing(false);
-      setFormData({ 'Facility Name': '', Location: '', Type: '', Status: '' });
+      setFormData({ 'FacilityName': '', Location: '', Type: '', Status: '' });
     };
     const handleDeleteClick=(index)=>{
         const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
@@ -46,20 +66,38 @@ const Facilities = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     };
   
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit =  async (e) => {
       e.preventDefault();
       if (isEditing) {
-        setRows((prevRows) => {
-          const updatedRows = [...prevRows];
-          updatedRows[editIndex] = formData;
-          return updatedRows;
-        });
+        const editFacility = await putData('',data);
       } else {
-        setRows((prevRows) => [...prevRows, formData]);
+        const data = {
+          facilityName: formData.FacilityName,
+          location: formData.Location,
+          typeID: formData.Type,
+          status: formData.Status,
+      };
+        const newFacility = await postData('Facilities',data);
       }
       setIsAdding(false);
       setIsEditing(false);
-      setFormData({ 'Facility Name': '', Location: '', Type: '', Status: '' });
+      setFormData({ 'FacilityName': '', Location: '', Type: '', Status: '' });
+      getAllFacilities();
+    };
+
+    const getAllFacilities = async () => {
+      try {
+        const data = await getData('Facilities');
+        const transformedData = data.map((facility) => ({
+          'FacilityName': facility.facilityName,
+          Location: facility.location,
+          Type: facility.type?.typeName || 'Unknown', // Handling nested type object
+          Status: facility.status,
+      }));
+        setRows(transformedData);
+      } catch (error) {
+        console.error('Error loading facilities:', error);
+      }
     };
   
     return (
@@ -69,9 +107,9 @@ const Facilities = () => {
             <form onSubmit={handleFormSubmit}>
               <Box display="flex" flexDirection="column" gap={2}>
                 <TextField
-                  label="Facility Name"
-                  name="Facility Name"
-                  value={formData['Facility Name']}
+                  label="FacilityName"
+                  name="FacilityName"
+                  value={formData['FacilityName']}
                   onChange={handleInputChange}
                   required
                 />
