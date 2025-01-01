@@ -1,70 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import BasicTable from '../components/common/BasicTable';
 import { TextField, Button, Box, Paper } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { getData } from '../services/getService';
 
-const Spaces = () => {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+const Assets = () => {
+  const [headers] = useState(['Asset Name', 'Category', 'Warranty Expiry Date', 'Condition']);
+  const [rows, setRows] = useState([
+    { 'Asset Name': 'Projector', 'Category': 'Electronics', 'Warranty Expiry Date': '2030/01/01', 'Condition': 'New' },
+    { 'Asset Name': 'Monitor', 'Category': 'Electronics', 'Warranty Expiry Date': '2030/01/01', 'Condition': 'New' },
+  ]);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
-    'Space Name': '',
-    'Facility Name': '',
-    Type: '',
-    Area: '',
+    'Asset Name': '',
+    'Category': '',
+    'Warranty Expiry Date': '',
+    'Condition': '',
   });
-
-  const columns = [
-    {
-      field: 'spaceID',
-      headerName: 'Space ID',
-      width: 90
-    },
-    {
-      field: 'spaceName',
-      headerName: 'Space Name',
-      width: 150
-    },
-    {
-      field: 'typeName',
-      headerName: 'Type',
-      width: 150,
-      valueGetter: (params) => params?.row?.type?.typeName || 'N/A'
-    },
-    {
-      field: 'capacity',
-      headerName: 'Capacity',
-      width: 150
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 110
-    }
-  ];
-
-  useEffect(() => {
-    // Calling the service method when the component mounts
-    const listData = async () => {
-      try {
-        const result = await getData("Spaces");
-        setRows(result);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    listData();
-  }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ 'Asset Name': '', 'Category': '', 'Warranty Expiry Date': '', 'Condition': '' });
   };
 
   const handleEditClick = (index) => {
@@ -77,7 +34,7 @@ const Spaces = () => {
   const handleCancelClick = () => {
     setIsAdding(false);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ 'Asset Name': '', 'Category': '', 'Warranty Expiry Date': '', 'Condition': '' });
   };
   const handleDeleteClick = (index) => {
     const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
@@ -102,7 +59,7 @@ const Spaces = () => {
     }
     setIsAdding(false);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ 'Asset Name': '', 'Category': '', 'Warranty Expiry Date': '', 'Condition': '' });
   };
 
   return (
@@ -112,30 +69,30 @@ const Spaces = () => {
           <form onSubmit={handleFormSubmit}>
             <Box display="flex" flexDirection="column" gap={2}>
               <TextField
-                label="Space Name"
-                name="Space Name"
-                value={formData['Space Name']}
+                label="Asset Name"
+                name="Asset Name"
+                value={formData['Asset Name']}
                 onChange={handleInputChange}
                 required
               />
               <TextField
-                label="Facility Name"
-                name="Facility Name"
-                value={formData['Facility Name']}
+                label="Category"
+                name="Category"
+                value={formData['Category']}
                 onChange={handleInputChange}
                 required
               />
               <TextField
-                label="Type"
-                name="Type"
-                value={formData.Type}
+                label="Warranty Expiry Date"
+                name="Warranty Expiry Date"
+                value={formData['Warranty Expiry Date']}
                 onChange={handleInputChange}
                 required
               />
               <TextField
-                label="Area"
-                name="Area"
-                value={formData.Area}
+                label="Condition"
+                name="Condition"
+                value={formData['Condition']}
                 onChange={handleInputChange}
                 required
               />
@@ -153,24 +110,17 @@ const Spaces = () => {
       ) : (
         <>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <h2>Spaces</h2>
+            <h2>Assets</h2>
             <Button sx={{ backgroundColor: '#565353' }} variant="contained" color="primary" onClick={handleAddClick}>
               Add Space
             </Button>
           </Box>
 
-          <DataGrid
+          <BasicTable
+            headers={headers}
             rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
-            getRowId={(row) => row.spaceID}
-            pageSizeOptions={[5]}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
           />
         </>
       )}
@@ -178,4 +128,4 @@ const Spaces = () => {
   );
 };
 
-export default Spaces;
+export default Assets;

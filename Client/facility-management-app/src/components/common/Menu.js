@@ -94,24 +94,29 @@ const Menu = () => {
             <ListItemText primary="Space" />
           </MenuItem>
         </Link>
-        <MenuItem
-          sx={{
-            margin: '10px',
-            color: 'white',
-            fontSize: '16px',
-            height: '50px',
-            '&:hover': {
-              backgroundColor: grey[700], // Change background color on hover
+        
+        <Link to="/assets" style={{ textDecoration: 'none' }}>
+          <MenuItem
+            sx={{
+              margin: '10px',
               color: 'white',
-              borderRadius: '10px 10px 10px 10px', // Change text color on hover
-            },
-          }}
-        >
-          <ListItemIcon sx={{ color: 'white' }}>
-            <BedroomParentIcon />
-          </ListItemIcon>
-          <ListItemText primary="Asset" />
-        </MenuItem>
+              fontSize: '16px',
+              height: '50px',
+              '&:hover': {
+                backgroundColor: grey[700], // Change background color on hover
+                color: 'white',
+                borderRadius: '10px 10px 10px 10px', // Change text color on hover
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white' }}>
+              <TableChartIcon />
+            </ListItemIcon>
+            <ListItemText primary="Asset" />
+          </MenuItem>
+        </Link>
+
+
       </List>
     </Box>
   );
