@@ -49,6 +49,16 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
+        [HttpPut("Space/{id}")]
+        public async Task<IActionResult> UpdateSpace(int id)
+        {
+            var space = await _context.Spaces.FirstOrDefaultAsync(s=>s.SpaceID == id);
+            if(space == null) return BadRequest();
+            _context.Entry(space).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -57,6 +67,13 @@ namespace WebAPI.Controllers
             _context.Facilities.Remove(facility);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpGet("Types")]
+        public async Task<IActionResult> GetTypes()
+        {
+            var types = await _context.Types.ToListAsync();
+            return Ok(types);
         }
     }
 
