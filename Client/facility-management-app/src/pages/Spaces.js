@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Paper } from '@mui/material';
+import { TextField, Button, Box, Paper, Snackbar, Alert, Backdrop, CircularProgress } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 
+import ConfirmationDialog from '../components/common/ConfirmationDialog';
 import { getData } from '../services/getService';
+import { deleteData } from '../services/deleteService';
 
 const Spaces = () => {
   const [rows, setRows] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [deleteIndex, setDeleteIndex] = useState(null);
   const [formData, setFormData] = useState({
     'Space Name': '',
     'Facility Name': '',
@@ -29,34 +26,34 @@ const Spaces = () => {
     {
       field: 'spaceID',
       headerName: 'Space ID',
-      width: 100
+      width: 200
     },
     {
       field: 'spaceName',
       headerName: 'Space Name',
-      width: 150
+      width: 200
     },
     {
       field: 'typeName',
       headerName: 'Type',
-      width: 150,
+      width: 200,
       renderCell: (params) => params?.row?.type?.typeName || 'N/A'
     },
     {
       field: 'capacity',
       headerName: 'Capacity',
-      width: 150
+      width: 200
     },
     {
       field: 'status',
       headerName: 'Status',
-      width: 150
+      width: 200
     },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 150,
+      width: 200,
       getActions: (params) => [
         <GridActionsCellItem
           icon={<EditIcon />}
@@ -71,16 +68,23 @@ const Spaces = () => {
     }
   ];
 
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [isLoading, setIsLoading] = useState(false); // Spinner state
+
   useEffect(() => {
+    setIsLoading(true);
     // Calling the service method when the component mounts
     const listData = async () => {
       try {
         const result = await getData("Spaces");
         setRows(result);
-        setLoading(false);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -111,14 +115,48 @@ const Spaces = () => {
   const handleDeleteClick = (e, spaceId) => {
     e.preventDefault();
     console.log(spaceId);
+    //setDeleteIndex(index);
+    setIsDeleteDialogOpen(true);
+
     //do whatever you want with the row
     // const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
     // setRows(updatedRows);
   };
 
+  const cancelDelete = () => {
+    setDeleteIndex(null);
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setIsLoading(true);
+      //const updatedRows = rows.filter((_, rowIndex) => rowIndex !== deleteIndex);
+      await deleteData('Spaces', rows[deleteIndex].spaceID);
+      setRows(updatedRows);
+      setSnackbarMessage('Space deleted successfully');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    }
+    catch (error) {
+      setSnackbarMessage('Failed to delete space. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+    finally {
+      setIsDeleteDialogOpen(false);
+      setIsLoading(false);
+    }
+
   };
 
   const handleFormSubmit = (e) => {
@@ -207,6 +245,33 @@ const Spaces = () => {
           />
         </>
       )}
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this facility? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
     </Box>
   );
 };

@@ -3,17 +3,6 @@ using WebAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add CORS services
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSpecificOrigins", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000") // Replace with your frontend's URL
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -23,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS services
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -30,7 +20,6 @@ builder.Services.AddCors(options =>
                .AllowAnyMethod()
                .AllowAnyHeader());
 });
-
 
 var app = builder.Build();
 
@@ -44,9 +33,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Use CORS
-app.UseCors("AllowSpecificOrigins");
 
 app.UseAuthorization();
 
