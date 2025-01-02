@@ -1,10 +1,22 @@
+// src/components/Footer.js
 import React from 'react';
+import { Box } from '@mui/material';
 
 const Footer = () => {
   return (
-    <footer style={{ background: '#282c34', padding: '10px', color: '#fff', textAlign: 'center', marginTop: 'auto' }}>
-      <p>© 2024 Facility Management App. All rights reserved.</p>
-    </footer>
+    <Box
+      sx={{
+        backgroundColor: '#fff',
+        padding: '15px',
+        boxShadow: '0 -4px 10px rgba(0, 0, 0, 0.1)',
+        borderTop: '1px solid #ddd',
+        textAlign: 'center',
+        marginLeft: '20px',
+        marginRight: '20px',
+      }}
+    >
+      <p>Footer Content</p>
+    </Box>
   );
 };
 
