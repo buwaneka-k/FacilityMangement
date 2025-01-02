@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Paper } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 import { getData } from '../services/getService';
 
 const Spaces = () => {
   const [rows, setRows] = useState([]);
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -20,7 +29,7 @@ const Spaces = () => {
     {
       field: 'spaceID',
       headerName: 'Space ID',
-      width: 90
+      width: 100
     },
     {
       field: 'spaceName',
@@ -31,7 +40,7 @@ const Spaces = () => {
       field: 'typeName',
       headerName: 'Type',
       width: 150,
-      valueGetter: (params) => params?.row?.type?.typeName || 'N/A'
+      renderCell: (params) => params?.row?.type?.typeName || 'N/A'
     },
     {
       field: 'capacity',
@@ -41,7 +50,24 @@ const Spaces = () => {
     {
       field: 'status',
       headerName: 'Status',
-      width: 110
+      width: 150
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<EditIcon />}
+          label="Edit"
+          onClick={(e) => handleEditClick(e, params.row)}
+        />,
+        <GridActionsCellItem
+          icon={<DeleteIcon />}
+          label="Delete"
+          onClick={(e) => handleDeleteClick(e, params.row.spaceID)}
+        />]
     }
   ];
 
@@ -67,11 +93,13 @@ const Spaces = () => {
     setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
   };
 
-  const handleEditClick = (index) => {
-    setIsEditing(true);
-    setIsAdding(false);
-    setEditIndex(index);
-    setFormData(rows[index]);
+  const handleEditClick = (e, row) => {
+    e.preventDefault();
+    console.log(row);
+    // setIsEditing(true);
+    // setIsAdding(false);
+    // setEditIndex(index);
+    // setFormData(rows[index]);
   };
 
   const handleCancelClick = () => {
@@ -79,9 +107,13 @@ const Spaces = () => {
     setIsEditing(false);
     setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
   };
-  const handleDeleteClick = (index) => {
-    const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
-    setRows(updatedRows);
+
+  const handleDeleteClick = (e, spaceId) => {
+    e.preventDefault();
+    console.log(spaceId);
+    //do whatever you want with the row
+    // const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
+    // setRows(updatedRows);
   };
 
   const handleInputChange = (e) => {
@@ -171,6 +203,7 @@ const Spaces = () => {
             }}
             getRowId={(row) => row.spaceID}
             pageSizeOptions={[5]}
+            disableMultipleSelection={true}
           />
         </>
       )}
