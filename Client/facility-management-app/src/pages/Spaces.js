@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Paper, Snackbar, Alert, Backdrop, CircularProgress } from '@mui/material';
+import { TextField, Button, Box, Paper, Select, InputLabel, MenuItem, FormControl } from '@mui/material';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Swal from 'sweetalert2'
 
-import ConfirmationDialog from '../components/common/ConfirmationDialog';
 import { getData } from '../services/getService';
 import { deleteData } from '../services/deleteService';
 
 const Spaces = () => {
   const [rows, setRows] = useState([]);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [types, setTypes] = useState([]);
+  const [facilities, setFacilities] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [deleteIndex, setDeleteIndex] = useState(null);
   const [formData, setFormData] = useState({
-    'Space Name': '',
-    'Facility Name': '',
+    SpaceName: '',
+    Facility: '',
     Type: '',
     Area: '',
   });
@@ -68,33 +68,45 @@ const Spaces = () => {
     }
   ];
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-  const [isLoading, setIsLoading] = useState(false); // Spinner state
-
   useEffect(() => {
-    setIsLoading(true);
     // Calling the service method when the component mounts
     const listData = async () => {
       try {
         const result = await getData("Spaces");
         setRows(result);
-        setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setIsLoading(false);
+        console.error("Error fetching spaces:", error);
+      }
+    };
+
+    const listFacilities = async () => {
+      try {
+        const result = await getData("Facilities");
+        setFacilities(result);
+      } catch (error) {
+        console.error("Error fetching facilities:", error);
+      }
+    };
+
+    const listTypes = async () => {
+      try {
+        const data = await getData('Facilities/Types');
+        const spaceTypes = data.filter((t) => t.tableName === "Spaces");
+        setTypes(spaceTypes);
+      } catch (error) {
+        console.error('Error fetching types:', error);
       }
     };
 
     listData();
+    listTypes();
+    listFacilities();
   }, []);
 
   const handleAddClick = () => {
     setIsAdding(true);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
   };
 
   const handleEditClick = (e, row) => {
@@ -109,70 +121,85 @@ const Spaces = () => {
   const handleCancelClick = () => {
     setIsAdding(false);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
   };
 
-  const handleDeleteClick = (e, spaceId) => {
+  const handleDeleteClick = async (e, spaceId) => {
     e.preventDefault();
-    console.log(spaceId);
-    //setDeleteIndex(index);
-    setIsDeleteDialogOpen(true);
+    Swal.fire({
+      title: "Are you sure you want to proceed?",
+      showDenyButton: true,
+      showCancelButton: false,
+      confirmButtonText: "Save",
+      denyButtonText: "Cancel"
+    }).then(async (result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        try {
+          await deleteData('Spaces', spaceId);
+          Swal.fire("Space deleted successfully", "", "success");
+        }
+        catch (error) {
+          Swal.fire("Failed to delete space. Please try again", "", "error");
+        }
+        finally {
+          //loading
+        }
+      }
+    });
 
-    //do whatever you want with the row
-    // const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
-    // setRows(updatedRows);
-  };
-
-  const cancelDelete = () => {
-    setDeleteIndex(null);
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "Type" || name === "Facility" ? parseInt(value, 10) : value, // Ensure Type is stored as an integer
+    }));
   };
 
-  const confirmDelete = async () => {
-    try {
-      setIsLoading(true);
-      //const updatedRows = rows.filter((_, rowIndex) => rowIndex !== deleteIndex);
-      await deleteData('Spaces', rows[deleteIndex].spaceID);
-      setRows(updatedRows);
-      setSnackbarMessage('Space deleted successfully');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    }
-    catch (error) {
-      setSnackbarMessage('Failed to delete space. Please try again.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-    }
-    finally {
-      setIsDeleteDialogOpen(false);
-      setIsLoading(false);
-    }
-
-  };
-
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
+    console.log(e);
     e.preventDefault();
     if (isEditing) {
-      setRows((prevRows) => {
-        const updatedRows = [...prevRows];
-        updatedRows[editIndex] = formData;
-        return updatedRows;
-      });
+      const data = {
+        spaceName: formData.SpaceName,
+        facilityID: formData.Facility,
+        typeID: formData.Type,
+        capacity: formData.Area
+      };
+
+      try{
+        await putData('Spaces/',rows[editIndex].facilityID, data);
+        setSnackbarMessage('Facility updating successfull.');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+      }
+      catch(error)
+      {
+        setSnackbarMessage('Facility updating failed.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+      finally
+      {
+        setIsAdding(false);
+        setIsEditing(false);
+        setFormData({ FacilityName: '', Location: '', Type: '', Status: '' });
+        setIsLoading(false);
+        getAllFacilities();
+      }
+
     } else {
       setRows((prevRows) => [...prevRows, formData]);
     }
     setIsAdding(false);
     setIsEditing(false);
-    setFormData({ 'Space Name': '', 'Facility Name': '', Type: '', Area: '' });
+    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
+  };
+
+  const handleChange = (event) => {
+    setFormData((prev) => ({ ...prev, Facility: event.target.value }));
   };
 
   return (
@@ -188,20 +215,34 @@ const Spaces = () => {
                 onChange={handleInputChange}
                 required
               />
-              <TextField
-                label="Facility Name"
-                name="Facility Name"
-                value={formData['Facility Name']}
-                onChange={handleInputChange}
-                required
-              />
-              <TextField
-                label="Type"
-                name="Type"
-                value={formData.Type}
-                onChange={handleInputChange}
-                required
-              />
+              <FormControl fullWidth required>
+                <InputLabel>Facility Name</InputLabel>
+                <Select
+                  name="Facility Name"
+                  value={formData['Facility Name']}
+                  onChange={handleInputChange}
+                >
+                  {facilities.map((option) => (
+                    <MenuItem key={option.facilityID} value={option.facilityID}>
+                      {option.facilityName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  name="Type"
+                  value={formData.Type}
+                  onChange={handleInputChange}
+                >
+                  {types.map((option) => (
+                    <MenuItem key={option.typeID} value={option.typeID}>
+                      {option.typeName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 label="Area"
                 name="Area"
@@ -245,32 +286,6 @@ const Spaces = () => {
           />
         </>
       )}
-
-      <ConfirmationDialog
-        open={isDeleteDialogOpen}
-        title="Confirm Delete"
-        message="Are you sure you want to delete this facility? This action cannot be undone."
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
-
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1 }}
-        open={isLoading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
 
     </Box>
   );
