@@ -6,6 +6,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Swal from 'sweetalert2'
 
 import { getData } from '../services/getService';
+import { postData } from '../services/postService';
+import { putData } from '../services/putService';
 import { deleteData } from '../services/deleteService';
 
 const Spaces = () => {
@@ -14,12 +16,13 @@ const Spaces = () => {
   const [facilities, setFacilities] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [spaceId, setSpaceId] = useState(null);
   const [formData, setFormData] = useState({
     SpaceName: '',
     Facility: '',
     Type: '',
     Area: '',
+    Status: ''
   });
 
   const columns = [
@@ -75,7 +78,7 @@ const Spaces = () => {
         const result = await getData("Spaces");
         setRows(result);
       } catch (error) {
-        console.error("Error fetching spaces:", error);
+        Swal.fire("Failed to load spaces. Please try again", "", "error");
       }
     };
 
@@ -84,7 +87,7 @@ const Spaces = () => {
         const result = await getData("Facilities");
         setFacilities(result);
       } catch (error) {
-        console.error("Error fetching facilities:", error);
+        Swal.fire("Failed to load facilities. Please try again", "", "error");
       }
     };
 
@@ -94,7 +97,7 @@ const Spaces = () => {
         const spaceTypes = data.filter((t) => t.tableName === "Spaces");
         setTypes(spaceTypes);
       } catch (error) {
-        console.error('Error fetching types:', error);
+        Swal.fire("Failed to load types. Please try again", "", "error");
       }
     };
 
@@ -103,25 +106,41 @@ const Spaces = () => {
     listFacilities();
   }, []);
 
+  const getAllSpaces = async () => {
+    try {
+      const result = await getData("Spaces");
+      setRows(result);
+    } catch (error) {
+      Swal.fire("Failed to load spaces. Please try again", "", "error");
+    }
+  };
+
   const handleAddClick = () => {
     setIsAdding(true);
     setIsEditing(false);
-    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
+    setSpaceId(null);
+    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '', Status: '' });
   };
 
   const handleEditClick = (e, row) => {
     e.preventDefault();
-    console.log(row);
-    // setIsEditing(true);
-    // setIsAdding(false);
-    // setEditIndex(index);
-    // setFormData(rows[index]);
+    setIsEditing(true);
+    setIsAdding(false);
+    setSpaceId(row.spaceID);
+    setFormData({
+      SpaceName: row.spaceName,
+      Facility: row.Facility?.facilityID || "",
+      Type: row.Type?.typeID || "",
+      Area: row.capacity,
+      Status: row.status
+    });
   };
 
   const handleCancelClick = () => {
     setIsAdding(false);
     setIsEditing(false);
-    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
+    setSpaceId(null);
+    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '', Status: '' });
   };
 
   const handleDeleteClick = async (e, spaceId) => {
@@ -138,16 +157,13 @@ const Spaces = () => {
         try {
           await deleteData('Spaces', spaceId);
           Swal.fire("Space deleted successfully", "", "success");
+          getAllSpaces();
         }
         catch (error) {
           Swal.fire("Failed to delete space. Please try again", "", "error");
         }
-        finally {
-          //loading
-        }
       }
     });
-
   };
 
   const handleInputChange = (e) => {
@@ -159,47 +175,51 @@ const Spaces = () => {
   };
 
   const handleFormSubmit = async (e) => {
-    console.log(e);
     e.preventDefault();
-    if (isEditing) {
-      const data = {
-        spaceName: formData.SpaceName,
-        facilityID: formData.Facility,
-        typeID: formData.Type,
-        capacity: formData.Area
-      };
 
-      try{
-        await putData('Spaces/',rows[editIndex].facilityID, data);
-        setSnackbarMessage('Facility updating successfull.');
-        setSnackbarSeverity('success');
-        setSnackbarOpen(true);
+    const data = {
+      spaceName: formData.SpaceName,
+      facilityID: formData.Facility,
+      typeID: formData.Type,
+      capacity: formData.Area,
+      status: formData.Status
+    };
+
+    if (isEditing) {
+      try {
+        //Edit an exisitng space
+        data.spaceID = spaceId;
+        console.log(data);
+        await putData('Spaces/', spaceId, data);
+        Swal.fire("Space updated successfully", "", "success");
       }
-      catch(error)
-      {
-        setSnackbarMessage('Facility updating failed.');
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
+      catch (error) {
+        Swal.fire("Failed to update space. Please try again", "", "error");
       }
-      finally
-      {
+      finally {
         setIsAdding(false);
         setIsEditing(false);
+        setSpaceId(null);
         setFormData({ FacilityName: '', Location: '', Type: '', Status: '' });
-        setIsLoading(false);
-        getAllFacilities();
+        getAllSpaces();
       }
-
     } else {
-      setRows((prevRows) => [...prevRows, formData]);
+      try {
+        //Add new space
+        await postData('Spaces/', data);
+        Swal.fire("Space added successfully", "", "success");
+      }
+      catch (error) {
+        Swal.fire("Failed to add space. Please try again", "", "error");
+      }
+      finally {
+        setIsAdding(false);
+        setIsEditing(false);
+        setSpaceId(null);
+        setFormData({ FacilityName: '', Location: '', Type: '', Status: '' });
+        getAllSpaces();
+      }
     }
-    setIsAdding(false);
-    setIsEditing(false);
-    setFormData({ SpaceName: '', Facility: '', Type: '', Area: '' });
-  };
-
-  const handleChange = (event) => {
-    setFormData((prev) => ({ ...prev, Facility: event.target.value }));
   };
 
   return (
@@ -210,16 +230,16 @@ const Spaces = () => {
             <Box display="flex" flexDirection="column" gap={2}>
               <TextField
                 label="Space Name"
-                name="Space Name"
-                value={formData['Space Name']}
+                name="SpaceName"
+                value={formData.SpaceName}
                 onChange={handleInputChange}
                 required
               />
               <FormControl fullWidth required>
                 <InputLabel>Facility Name</InputLabel>
                 <Select
-                  name="Facility Name"
-                  value={formData['Facility Name']}
+                  name="Facility"
+                  value={formData.Facility}
                   onChange={handleInputChange}
                 >
                   {facilities.map((option) => (
@@ -247,6 +267,13 @@ const Spaces = () => {
                 label="Area"
                 name="Area"
                 value={formData.Area}
+                onChange={handleInputChange}
+                required
+              />
+              <TextField
+                label="Status"
+                name="Status"
+                value={formData.Status}
                 onChange={handleInputChange}
                 required
               />
